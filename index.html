@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA ELITE // Premium Store</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons & Canvas Confetti -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      transition: background-color 0.3s, color 0.3s; 
+      -webkit-tap-highlight-color: transparent; 
+      overflow-x: hidden !important;
+      overscroll-behavior-x: none !important;
+    }
+
+    body.modal-open {
+      overflow: hidden !important;
+      position: fixed;
+      width: 100%;
+    }
+
+    html {
+      overflow-x: hidden !important;
+      overscroll-behavior-x: none !important;
+    }
+    
+    .glass-nav { 
+      background: rgba(255, 255, 255, 0.95); 
+      backdrop-filter: blur(15px); 
+    }
+    .dark .glass-nav { 
+      background: rgba(15, 23, 42, 0.95); 
+      backdrop-filter: blur(15px); 
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Fixed Search Bar Smooth Transition for Mobile */
+    .search-input-collapsed { width: 0px !important; opacity: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
+    .search-input-expanded { width: 110px !important; opacity: 1 !important; padding-left: 0.6rem !important; padding-right: 0.6rem !important; pointer-events: auto; }
+    @media (min-width: 640px) { .search-input-expanded { width: 220px !important; } }
+
+    /* Smooth 3D Tilt Effect */
+    .card-3d-wrap {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+    }
+    .card-3d-inner {
+      transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .shadow-3d-glow {
+      box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.18), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .dark .shadow-3d-glow {
+      box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.6), 0 0 20px 0 rgba(99, 102, 241, 0.2);
+    }
+
+    .banner-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      pointer-events: none;
+    }
+    .banner-slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .banner-floating-side-buttons {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body class="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100" onclick="handleGlobalClicks(event)">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 glass-nav border-b border-slate-200/60 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14 sm:h-16 border-b border-slate-100 dark:border-slate-800/60">
+        
+        <!-- Brand Logo -->
+        <div class="flex items-center space-x-2.5 cursor-pointer group" onclick="scrollToTop()">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/40 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <span class="text-sm sm:text-lg font-extrabold tracking-tight">AURA<span class="text-indigo-600">.ELITE</span></span>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center space-x-2">
+          <button onclick="toggleTheme()" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center shrink-0 active:scale-95 transition-transform" title="Toggle Theme">
+            <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+            <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-slate-700"></i>
+          </button>
+
+          <div class="relative shrink-0">
+            <button id="menu-btn" onclick="toggleAccountMenu(event)" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center active:scale-95 transition-transform" title="Menu">
+              <i data-lucide="menu" class="w-4 h-4"></i>
+            </button>
+            <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-2 z-50 text-xs">
+              <button onclick="handleMenuAction('My account')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-slate-800 text-left font-semibold">My Account</button>
+              <button onclick="handleMenuAction('Outlets')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-slate-800 text-left font-semibold">Outlets & Locations</button>
+              <button onclick="handleMenuAction('Settings')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-slate-800 text-left font-semibold">Settings</button>
+              <hr class="my-1 border-slate-100 dark:border-slate-800">
+              <button onclick="handleMenuAction('Logout')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 text-left font-semibold">Logout</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sub-header -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-slate-50/50 dark:bg-slate-900/50">
+      <div class="flex items-center justify-between h-12 sm:h-14">
+        
+        <div id="search-container" class="relative flex items-center flex-1 mr-3">
+          <input type="text" id="search-input" oninput="handleSearch(event)" placeholder="Search products..." class="search-input-collapsed transition-all duration-300 bg-white dark:bg-slate-800 text-slate-900 dark:text-white py-2 px-3 rounded-full text-xs font-medium focus:outline-none border border-slate-200 dark:border-slate-700 shadow-sm"/>
+          <button id="search-toggle-btn" onclick="toggleSearchBar(event)" class="p-1.5 px-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shrink-0 shadow-sm active:scale-95 transition-transform">
+            <i data-lucide="search" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Search</span>
+          </button>
+        </div>
+
+        <div class="flex items-center space-x-2.5">
+          <button onclick="toggleWishlistModal()" class="relative p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-full shrink-0 active:scale-95 transition-transform shadow-sm" title="Wishlist">
+            <i data-lucide="heart" class="w-4 h-4"></i>
+            <span id="wishlist-badge" class="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+          </button>
+
+          <button onclick="toggleCartDrawer()" class="relative bg-slate-900 dark:bg-indigo-600 text-white p-2.5 rounded-full flex items-center justify-center shrink-0 active:scale-95 transition-transform shadow-md" title="Shopping Bag">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            <span id="cart-badge" class="absolute -top-1 -right-1 bg-indigo-600 dark:bg-pink-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">0</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 card-3d-wrap">
+    <div 
+      class="card-3d-inner relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 text-white min-h-[180px] sm:min-h-[320px] shadow-2xl shadow-3d-glow group"
+      onmousemove="handle3dTilt(event, this)"
+      onmouseleave="reset3dTilt(this)"
+      ontouchmove="handle3dTiltTouch(event, this)"
+      ontouchend="reset3dTilt(this)"
+    >
+      <div id="banner-slider-container" class="absolute inset-0 w-full h-full pointer-events-none"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/50 to-transparent z-10 pointer-events-none"></div>
+      
+      <div id="banner-content-container" class="relative z-20 p-5 sm:p-12 max-w-xl flex flex-col justify-center h-full min-h-[180px] sm:min-h-[320px] pointer-events-none"></div>
+      <div id="banner-dots" class="absolute bottom-3 right-3 z-30 flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-full backdrop-blur-md"></div>
+
+      <div class="banner-floating-side-buttons">
+        <button onclick="toggleContactModal()" class="w-10 h-10 sm:w-11 sm:h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full flex items-center justify-center shadow-xl shadow-emerald-600/50 active:scale-95 transition-transform group relative cursor-pointer pointer-events-auto" title="Chat with Owner">
+          <i data-lucide="message-square" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          <span class="absolute right-12 sm:right-14 bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">Chat with Owner</span>
+        </button>
+        <button onclick="toggleAiDrawer()" class="w-10 h-10 sm:w-11 sm:h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-600/50 active:scale-95 transition-transform group relative cursor-pointer pointer-events-auto" title="Ask AI">
+          <i data-lucide="bot" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          <span class="absolute right-12 sm:right-14 bg-slate-900 text-white text-xs font-semibold px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">Ask AI Assistant</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Category Bar -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+    <div id="category-bar" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1"></div>
+  </section>
+
+  <!-- Product Catalog -->
+  <section id="product-catalog" class="py-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <h2 class="text-base sm:text-2xl font-extrabold mb-3">Featured Catalog</h2>
+    <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6"></div>
+  </section>
+
+  <!-- CONTACT OWNER MODAL -->
+  <div id="contact-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 hidden transition-opacity duration-300">
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col p-5 relative shadow-3d-glow">
+      <button onclick="toggleContactModal()" class="absolute top-3 right-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full hover:scale-105 active:scale-95 transition-transform">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md">
+          <i data-lucide="message-square" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-sm">Chat with Store Owner</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Attached with Product Link</p>
+        </div>
+      </div>
+      <form onsubmit="handleOwnerMessage(event)" class="space-y-3">
+        <div id="contact-product-preview" class="hidden flex items-center gap-3 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+          <img id="contact-preview-img" src="" class="w-12 h-12 rounded-lg object-cover">
+          <div class="flex-1 min-w-0">
+            <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-full uppercase">Product Link</span>
+            <h4 id="contact-preview-name" class="font-bold text-xs truncate mt-0.5"></h4>
+            <p id="contact-preview-variant-price" class="text-[11px] font-semibold text-indigo-600"></p>
+          </div>
+          <button type="button" onclick="clearContactProduct()" class="text-slate-400 hover:text-red-500 p-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1">Your Name</label>
+          <input type="text" id="owner-msg-name" required placeholder="Enter your name" class="w-full bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1">Message / Inquiry</label>
+          <textarea id="owner-msg-text" required rows="3" placeholder="Ask about availability, delivery or custom package..." class="w-full bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md shadow-emerald-600/30 active:scale-95 transition-transform flex items-center justify-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i> Send Message on WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADVANCED PRODUCT DETAILS MODAL -->
+  <div id="product-details-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-start justify-center pt-20 sm:pt-24 pb-6 px-3 hidden transition-opacity duration-300 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-sm sm:max-w-md rounded-2xl shadow-2xl flex flex-col max-h-[80vh] overflow-hidden relative shadow-3d-glow my-auto">
+      <button onclick="closeProductDetailsModal()" class="absolute top-2.5 right-2.5 z-20 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full shadow hover:scale-105 active:scale-95 transition-transform">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      
+      <div class="w-full h-36 sm:h-48 bg-slate-100 dark:bg-slate-800 shrink-0 relative">
+        <img id="detail-modal-image" src="" alt="" class="w-full h-full object-cover">
+      </div>
+
+      <div id="variant-thumbnails-container" class="flex items-center gap-1.5 px-3.5 py-2 overflow-x-auto no-scrollbar bg-slate-50 dark:bg-slate-800/60 border-b dark:border-slate-800"></div>
+
+      <div class="p-3.5 sm:p-5 flex flex-col overflow-y-auto flex-1 space-y-3">
+        <div>
+          <span id="detail-modal-category" class="text-[9px] font-bold uppercase text-indigo-600 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-full">Category</span>
+          <h3 id="detail-modal-name" class="text-sm sm:text-lg font-extrabold mt-1">Name</h3>
+          <p id="detail-modal-price" class="text-sm sm:text-xl font-extrabold text-indigo-600 mt-0.5">$0.00</p>
+          <p id="detail-modal-desc" class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">Description</p>
+        </div>
+
+        <div id="variants-section" class="pt-2 border-t dark:border-slate-800">
+          <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">Select Package / Color Variant:</label>
+          <div id="variants-container" class="grid grid-cols-3 gap-2"></div>
+        </div>
+
+        <div class="pt-2 mt-auto border-t dark:border-slate-800 space-y-2">
+          <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded-xl">
+            <span class="text-xs font-semibold">Quantity:</span>
+            <div class="flex items-center gap-2.5">
+              <button onclick="adjustModalQty(-1)" class="w-6 h-6 bg-white dark:bg-slate-700 rounded-lg font-bold text-xs active:scale-95">-</button>
+              <span id="modal-qty-counter" class="text-xs font-bold w-4 text-center">1</span>
+              <button onclick="adjustModalQty(1)" class="w-6 h-6 bg-white dark:bg-slate-700 rounded-lg font-bold text-xs active:scale-95">+</button>
+            </div>
+          </div>
+
+          <button onclick="openChatWithProductLink()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-emerald-600/20">
+            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Chat with Seller (Product Link)
+          </button>
+
+          <button onclick="shareCurrentProduct()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform border border-slate-200 dark:border-slate-700">
+            <i data-lucide="share-2" class="w-3.5 h-3.5 text-indigo-600"></i> Share Product
+          </button>
+
+          <button id="detail-modal-add-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Add to Bag
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT / PAYMENT MODAL -->
+  <div id="checkout-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-start justify-center pt-16 sm:pt-20 pb-6 px-3 hidden transition-opacity duration-300 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col relative shadow-3d-glow my-auto overflow-hidden">
+      
+      <div class="p-4 border-b dark:border-slate-800 bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+        <h3 class="font-extrabold text-sm sm:text-base flex items-center gap-2">
+          <i data-lucide="shopping-bag" class="w-5 h-5 text-indigo-600"></i> Customer Checkout & Payment
+        </h3>
+        <button onclick="toggleCheckoutModal()" class="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-full hover:scale-105 active:scale-95 transition-transform">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="processFinalOrder(event)" class="p-4 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+        
+        <div class="bg-indigo-50 dark:bg-indigo-950/60 p-3.5 rounded-xl border border-indigo-100 dark:border-indigo-900">
+          <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">Order Summary:</h4>
+          <div id="checkout-summary-items" class="text-xs space-y-1 text-slate-700 dark:text-slate-300"></div>
+          <div class="border-t border-indigo-200 dark:border-indigo-900 mt-2 pt-2 flex justify-between font-extrabold text-sm">
+            <span>Total Payable:</span>
+            <span id="checkout-summary-total" class="text-indigo-600">$0.00</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">1. Contact & Shipping Details</h4>
+          
+          <div>
+            <label class="block text-xs font-semibold mb-1">Full Name *</label>
+            <input type="text" id="cust-name" required placeholder="Enter your full name" class="w-full bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold mb-1">Primary Phone Number *</label>
+              <input type="tel" id="cust-phone-1" required placeholder="017XXXXXXXX" class="w-full bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-1">Alternative Phone Number *</label>
+              <input type="tel" id="cust-phone-2" required placeholder="018XXXXXXXX" class="w-full bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold mb-1">Full Delivery Address *</label>
+            <textarea id="cust-address" required rows="2" placeholder="House no, Road no, Area, City..." class="w-full bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2 border-t dark:border-slate-800">
+          <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">2. Select Payment Method</h4>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <label class="cursor-pointer">
+              <input type="radio" name="payment_method" value="bKash" checked class="peer hidden" onchange="togglePaymentDetails('bkash')">
+              <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-pink-950/40 text-center transition-all flex flex-col items-center gap-1">
+                <span class="font-extrabold text-xs text-pink-600">bKash</span>
+                <span class="text-[10px] text-slate-500">Mobile Banking</span>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="payment_method" value="Nagad" class="peer hidden" onchange="togglePaymentDetails('nagad')">
+              <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-950/40 text-center transition-all flex flex-col items-center gap-1">
+                <span class="font-extrabold text-xs text-orange-600">Nagad</span>
+                <span class="text-[10px] text-slate-500">Mobile Banking</span>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="payment_method" value="Rocket" class="peer hidden" onchange="togglePaymentDetails('rocket')">
+              <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-950/40 text-center transition-all flex flex-col items-center gap-1">
+                <span class="font-extrabold text-xs text-purple-600">Rocket</span>
+                <span class="text-[10px] text-slate-500">Mobile Banking</span>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="payment_method" value="Card" class="peer hidden" onchange="togglePaymentDetails('card')">
+              <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-950/40 text-center transition-all flex flex-col items-center gap-1">
+                <span class="font-extrabold text-xs text-indigo-600">Card</span>
+                <span class="text-[10px] text-slate-500">Visa / Mastercard</span>
+              </div>
+            </label>
+
+            <label class="cursor-pointer col-span-2 sm:col-span-1">
+              <input type="radio" name="payment_method" value="Cash on Delivery" class="peer hidden" onchange="togglePaymentDetails('cod')">
+              <div class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/40 text-center transition-all flex flex-col items-center gap-1">
+                <span class="font-extrabold text-xs text-emerald-600">Cash on Delivery</span>
+                <span class="text-[10px] text-slate-500">Hand Cash</span>
+              </div>
+            </label>
+          </div>
+
+          <div id="mobile-payment-box" class="bg-slate-100 dark:bg-slate-800 p-3 rounded-xl space-y-2 text-xs">
+            <p class="font-semibold text-slate-700 dark:text-slate-300" id="payment-instruction">
+              Send Money/Payment to Merchant bKash: <strong class="text-pink-600">01700000000</strong>
+            </p>
+            <div>
+              <label class="block text-[11px] font-semibold mb-1">Transaction ID (TrxID) *</label>
+              <input type="text" id="trx-id" placeholder="e.g. 9J87X6Y12" class="w-full bg-white dark:bg-slate-900 border dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform flex items-center justify-center gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i> Confirm Order & Pay
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Wishlist Modal -->
+  <div id="wishlist-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 hidden">
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col max-h-[80vh] shadow-3d-glow">
+      <div class="p-3 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800">
+        <h3 class="font-bold text-xs flex items-center gap-1.5"><i data-lucide="heart" class="w-4 h-4 fill-pink-500 text-pink-500"></i> Your Wishlist</h3>
+        <button onclick="toggleWishlistModal()"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="wishlist-items-container" class="p-3 overflow-y-auto space-y-3 flex-1"></div>
+    </div>
+  </div>
+
+  <!-- AI Assistant Drawer -->
+  <div id="ai-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[400px] bg-white dark:bg-slate-900 shadow-2xl translate-x-full border-l border-slate-200 dark:border-slate-800 flex flex-col text-slate-900 dark:text-white transition-transform duration-300">
+    <div class="p-3.5 border-b dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800 shrink-0">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-md"><i data-lucide="bot" class="w-4 h-4"></i></div>
+        <h3 class="text-xs font-bold">AURA AI Assistant (বাংলা / English)</h3>
+      </div>
+      <button onclick="toggleAiDrawer()"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div id="ai-messages" class="flex-1 p-3.5 overflow-y-auto space-y-3 text-xs">
+      <div class="bg-indigo-50 dark:bg-indigo-950 p-3 rounded-2xl shadow-sm text-slate-800 dark:text-slate-200">
+        👋 হ্যালো! AURA ELITE-এ আপনাকে স্বাগতম। আমি বাংলা ও ইংরেজি উভয় ভাষায় অর্ডার কনফার্ম করতে এবং প্রোডাক্ট সিলেক্ট করতে সাহায্য করতে প্রস্তুত। বলুন কীভাবে সাহায্য করব?<br><br>
+        <i>Hello! Welcome to AURA ELITE. I can assist you in both Bangla and English. How can I help you today?</i>
+      </div>
+    </div>
+    <div class="p-3 border-t dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+      <form id="ai-form" onsubmit="handleAiSubmit(event)" class="flex gap-2">
+        <input type="text" id="ai-input" placeholder="Type in Bangla or English..." class="flex-1 bg-slate-100 dark:bg-slate-800 border dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <button type="submit" class="bg-indigo-600 text-white p-2.5 rounded-xl active:scale-95 transition-transform"><i data-lucide="send" class="w-4 h-4"></i></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cart Drawer -->
+  <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[380px] bg-white dark:bg-slate-900 shadow-2xl translate-x-full border-l border-slate-200 dark:border-slate-800 flex flex-col text-slate-900 dark:text-white transition-transform duration-300">
+    <div class="p-4 border-b dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800 shrink-0">
+      <h3 class="text-sm font-bold">Your Shopping Bag</h3>
+      <button onclick="toggleCartDrawer()"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    
+    <div id="cart-items" class="flex-1 p-4 overflow-y-auto space-y-3"></div>
+    
+    <div class="p-4 border-t dark:border-slate-800 bg-slate-50 dark:bg-slate-800 space-y-3 shrink-0">
+      <div class="flex justify-between font-bold text-sm">
+        <span>Total Amount:</span>
+        <span id="cart-total" class="text-indigo-600">$0.00</span>
+      </div>
+      <button onclick="openCheckoutModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs shadow-md shadow-indigo-600/30 active:scale-95 transition-transform">
+        Proceed to Checkout
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const productsData = [
+      { 
+        id: 'p1', name: 'Aura Studio Pro Wireless', category: 'Audio', price: 299.00, 
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80', 
+        desc: 'Active noise cancelling premium headphones with up to 40 hours of continuous high-fidelity spatial audio playback.',
+        variants: [
+          { 
+            name: '1 pcs', priceMultiplier: 1.0, 
+            images: [
+              'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80',
+              'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=500&q=80',
+              'https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=500&q=80'
+            ] 
+          },
+          { 
+            name: '2 pcs Pack', priceMultiplier: 1.8, 
+            images: [
+              'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500&q=80',
+              'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=500&q=80'
+            ] 
+          },
+          { 
+            name: '3 pcs Pack', priceMultiplier: 2.5, 
+            images: [
+              'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&q=80'
+            ] 
+          }
+        ]
+      },
+      { 
+        id: 'p2', name: 'Aura Watch Ultra Titanium', category: 'Wearables', price: 449.00, 
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80', 
+        desc: 'Titanium chassis smart biometric watch featuring real-time health telemetry and precise dual-frequency GPS.',
+        variants: [
+          { name: 'Standard', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80', 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&q=80'] },
+          { name: 'Pro Edition', priceMultiplier: 1.25, images: ['https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500&q=80'] }
+        ]
+      },
+      { id: 'p3', name: 'Aura Pods ANC Pro', category: 'Audio', price: 179.00, image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&q=80', desc: 'Compact wireless earbuds with deep sub-bass response.', variants: [{ name: 'Standard', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&q=80'] }] },
+      { id: 'p4', name: 'Aura Kinetic Pulse V1', category: 'Footwear', price: 220.00, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80', desc: 'Dynamic cushioning smart sneakers engineered for maximum energy return.', variants: [{ name: 'Red', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80', 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80'] }] },
+      { id: 'p5', name: 'Aura Cyber Vision VR', category: 'Gaming', price: 599.00, image: 'https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=500&q=80', desc: 'Next-generation immersive virtual reality headset.', variants: [{ name: '128GB', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=500&q=80'] }] },
+      { id: 'p6', name: 'Aura Horizon 4K Drone', category: 'Gadgets', price: 799.00, image: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=500&q=80', desc: 'Professional aerial photography drone.', variants: [{ name: 'Standard', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=500&q=80'] }] },
+      { id: 'p7', name: 'Aura Apex Mechanical Keyboard', category: 'Accessories', price: 149.00, image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&q=80', desc: 'Custom gasket-mounted mechanical keyboard.', variants: [{ name: 'RGB', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&q=80'] }] },
+      { id: 'p8', name: 'Aura Stellar Gaming Mouse', category: 'Accessories', price: 89.00, image: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=500&q=80', desc: 'Ultra-lightweight wireless esports gaming mouse.', variants: [{ name: 'Black', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=500&q=80'] }] },
+      { id: 'p9', name: 'Aura Nova Smart Speaker', category: 'Audio', price: 129.00, image: 'https://images.unsplash.com/photo-1543512214-318c7553f230?w=500&q=80', desc: 'Room-filling 360-degree smart speaker.', variants: [{ name: '1 pcs', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1543512214-318c7553f230?w=500&q=80'] }] },
+      { id: 'p10', name: 'Aura Neo Fitness Band', category: 'Wearables', price: 99.00, image: 'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=500&q=80', desc: 'Sleek waterproof fitness tracker.', variants: [{ name: 'Standard', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=500&q=80'] }] },
+      { id: 'p11', name: 'Aura Phantom Gaming Headset', category: 'Gaming', price: 199.00, image: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500&q=80', desc: 'Over-ear competitive gaming headset.', variants: [{ name: 'Standard', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=500&q=80'] }] },
+      { id: 'p12', name: 'Aura Velocity Carbon Runner', category: 'Footwear', price: 250.00, image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80', desc: 'Elite carbon-plated running shoes.', variants: [{ name: 'US 9', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80'] }] },
+      { id: 'p13', name: 'Aura Lumina Desk Lamp', category: 'Gadgets', price: 79.00, image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&q=80', desc: 'Smart LED desk lamp.', variants: [{ name: 'White', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&q=80'] }] },
+      { id: 'p14', name: 'Aura Titan Power Bank', category: 'Gadgets', price: 110.00, image: 'https://images.unsplash.com/photo-1609592424104-972183c74a9d?w=500&q=80', desc: 'High-capacity fast-charging power bank.', variants: [{ name: '25k mAh', priceMultiplier: 1.0, images: ['https://images.unsplash.com/photo-1609592424104-972183c74a9d?w=500&q=80'] }] }
+    ];
+
+    let bannerSlides = [
+      { id: 'b1', title: 'Next-Gen Tech Crafted For Excellence.', desc: 'Explore our premium catalog of audio equipment and wearables.', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&q=80' },
+      { id: 'b2', title: 'Smart Wearables Redefine Your Limits.', desc: 'Advanced biometric sensors with titanium durability.', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80' }
+    ];
+
+    let currentSlideIndex = 0;
+    let bannerInterval = null;
+    let cart = [];
+    let wishlist = [];
+    let modalSelectedQty = 1;
+    let activeModalProductId = null;
+    let selectedVariantIndex = 0;
+    let activeSearchQuery = '';
+    let selectedCategory = 'All';
+    let attachedContactProduct = null;
+
+    function renderBannerSlider() {
+      const container = document.getElementById('banner-slider-container');
+      const contentContainer = document.getElementById('banner-content-container');
+      const dotsContainer = document.getElementById('banner-dots');
+      if (!container || !contentContainer) return;
+
+      container.innerHTML = bannerSlides.map((slide, idx) => `
+        <div class="banner-slide ${idx === currentSlideIndex ? 'active' : ''}">
+          <img src="${slide.image}" class="w-full h-full object-cover">
+        </div>
+      `).join('');
+
+      const activeSlide = bannerSlides[currentSlideIndex];
+      contentContainer.innerHTML = `
+        <span class="inline-flex items-center gap-1 bg-indigo-500/30 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full uppercase w-max mb-2 backdrop-blur-md">Featured Promo</span>
+        <h1 class="text-xl sm:text-4xl font-extrabold leading-snug">${activeSlide.title}</h1>
+        <p class="text-slate-300 text-xs sm:text-sm mt-1 hidden sm:block">${activeSlide.desc}</p>
+      `;
+
+      dotsContainer.innerHTML = bannerSlides.map((_, idx) => `
+        <button onclick="currentSlideIndex=${idx};renderBannerSlider();" class="w-2 h-2 rounded-full transition-all ${idx === currentSlideIndex ? 'bg-indigo-500 w-4' : 'bg-white/40'}"></button>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    function startBannerInterval() {
+      if (bannerInterval) clearInterval(bannerInterval);
+      bannerInterval = setInterval(() => {
+        if (!document.hidden) {
+          currentSlideIndex = (currentSlideIndex + 1) % bannerSlides.length;
+          renderBannerSlider();
+        }
+      }, 4000);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        clearInterval(bannerInterval);
+      } else {
+        startBannerInterval();
+      }
+    });
+
+    function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+
+    function toggleSearchBar(e) {
+      if (e) e.stopPropagation();
+      const input = document.getElementById('search-input');
+      input.classList.toggle('search-input-collapsed');
+      input.classList.toggle('search-input-expanded');
+      if (!input.classList.contains('search-input-collapsed')) {
+        input.focus();
+      } else {
+        input.value = '';
+        activeSearchQuery = '';
+        renderProducts();
+      }
+    }
+
+    function handleGlobalClicks(e) {
+      closeMenuDropdownOnClickOutside(e);
+      const searchContainer = document.getElementById('search-container');
+      const searchInput = document.getElementById('search-input');
+      if (searchContainer && !searchContainer.contains(e.target)) {
+        if (searchInput && searchInput.classList.contains('search-input-expanded')) {
+          searchInput.classList.add('search-input-collapsed');
+          searchInput.classList.remove('search-input-expanded');
+        }
+      }
+    }
+
+    function handleSearch(e) {
+      activeSearchQuery = e.target.value.toLowerCase().trim();
+      renderProducts();
+    }
+
+    function renderCategoryBar() {
+      const bar = document.getElementById('category-bar');
+      const cats = ['All', ...new Set(productsData.map(p => p.category))];
+      bar.innerHTML = cats.map(cat => `
+        <button onclick="selectedCategory='${cat}';renderCategoryBar();renderProducts();" class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-transform active:scale-95 ${selectedCategory === cat ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 text-slate-700 dark:text-slate-200'}">${cat}</button>
+      `).join('');
+    }
+
+    function openProductDetails(id) {
+      const product = productsData.find(p => p.id === id);
+      if (!product) return;
+      activeModalProductId = id;
+      modalSelectedQty = 1;
+      selectedVariantIndex = 0;
+
+      document.getElementById('modal-qty-counter').textContent = 1;
+      document.getElementById('detail-modal-name').textContent = product.name;
+      document.getElementById('detail-modal-category').textContent = product.category;
+      document.getElementById('detail-modal-desc').textContent = product.desc;
+
+      renderVariants(product);
+      updateVariantDisplay(product);
+
+      document.getElementById('detail-modal-add-btn').onclick = () => {
+        const variant = product.variants[selectedVariantIndex];
+        const finalPrice = product.price * variant.priceMultiplier;
+        const activeImg = variant.images && variant.images.length > 0 ? variant.images[0] : product.image;
+        addToCartCustom({ ...product, selectedVariant: variant.name, price: finalPrice, image: activeImg }, modalSelectedQty);
+        closeProductDetailsModal();
+        toggleCartDrawer();
+      };
+      
+      document.getElementById('product-details-modal').classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+
+    function renderVariants(product) {
+      const container = document.getElementById('variants-container');
+      if (!product.variants || product.variants.length === 0) {
+        document.getElementById('variants-section').classList.add('hidden');
+        return;
+      }
+      document.getElementById('variants-section').classList.remove('hidden');
+      container.innerHTML = product.variants.map((v, idx) => `
+        <button type="button" onclick="selectVariant(${idx})" class="p-2 rounded-xl border text-xs font-bold transition-all text-center ${idx === selectedVariantIndex ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 shadow-sm' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-400'}">
+          ${v.name}
+        </button>
+      `).join('');
+    }
+
+    function selectVariant(idx) {
+      selectedVariantIndex = idx;
+      const product = productsData.find(p => p.id === activeModalProductId);
+      renderVariants(product);
+      updateVariantDisplay(product);
+    }
+
+    function updateVariantDisplay(product) {
+      const variant = product.variants[selectedVariantIndex];
+      const finalPrice = product.price * variant.priceMultiplier;
+      document.getElementById('detail-modal-price').textContent = `$${finalPrice.toFixed(2)}`;
+
+      const images = variant.images && variant.images.length > 0 ? variant.images.slice(0, 10) : [product.image];
+      document.getElementById('detail-modal-image').src = images[0];
+
+      const thumbContainer = document.getElementById('variant-thumbnails-container');
+      if (images.length > 1) {
+        thumbContainer.classList.remove('hidden');
+        thumbContainer.innerHTML = images.map((img) => `
+          <img src="${img}" onclick="document.getElementById('detail-modal-image').src='${img}'" class="w-12 h-12 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-indigo-600 transition-all shrink-0">
+        `).join('');
+      } else {
+        thumbContainer.classList.add('hidden');
+      }
+    }
+
+    function adjustModalQty(delta) {
+      modalSelectedQty = Math.max(1, modalSelectedQty + delta);
+      document.getElementById('modal-qty-counter').textContent = modalSelectedQty;
+    }
+
+    function closeProductDetailsModal() { 
+      document.getElementById('product-details-modal').classList.add('hidden'); 
+      document.body.classList.remove('modal-open');
+    }
+
+    function openChatWithProductLink() {
+      const product = productsData.find(p => p.id === activeModalProductId);
+      if (!product) return;
+      const variant = product.variants[selectedVariantIndex];
+      const finalPrice = product.price * variant.priceMultiplier;
+      const activeImg = variant.images && variant.images.length > 0 ? variant.images[0] : product.image;
+
+      attachedContactProduct = {
+        name: product.name,
+        variant: variant.name,
+        price: finalPrice,
+        image: activeImg,
+        qty: modalSelectedQty
+      };
+
+      closeProductDetailsModal();
+      
+      const preview = document.getElementById('contact-product-preview');
+      preview.classList.remove('hidden');
+      document.getElementById('contact-preview-img').src = activeImg;
+      document.getElementById('contact-preview-name').textContent = product.name;
+      document.getElementById('contact-preview-variant-price').textContent = `Variant: ${variant.name} | Qty: ${modalSelectedQty} | $${finalPrice.toFixed(2)}`;
+      
+      toggleContactModal();
+      lucide.createIcons();
+    }
+
+    function clearContactProduct() {
+      attachedContactProduct = null;
+      document.getElementById('contact-product-preview').classList.add('hidden');
+    }
+
+    function shareCurrentProduct() {
+      const product = productsData.find(p => p.id === activeModalProductId);
+      if (!product) return;
+      const shareData = {
+        title: product.name,
+        text: `Check out ${product.name} on AURA ELITE!`,
+        url: window.location.href
+      };
+      if (navigator.share) {
+        navigator.share(shareData).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('🔗 Product link copied to clipboard!');
+      }
+    }
+
+    function toggleAccountMenu(e) {
+      if (e) e.stopPropagation();
+      document.getElementById('account-dropdown').classList.toggle('hidden');
+    }
+
+    function closeMenuDropdownOnClickOutside(e) {
+      const dropdown = document.getElementById('account-dropdown');
+      const menuBtn = document.getElementById('menu-btn');
+      if (dropdown && !dropdown.classList.contains('hidden') && !dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    }
+
+    function handleMenuAction(action) {
+      document.getElementById('account-dropdown').classList.add('hidden');
+      alert(`Clicked: ${action}`);
+    }
+
+    function toggleContactModal() {
+      const modal = document.getElementById('contact-modal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
+        clearContactProduct();
+      }
+    }
+
+    function handleOwnerMessage(e) {
+      e.preventDefault();
+      const name = document.getElementById('owner-msg-name').value;
+      const msgText = document.getElementById('owner-msg-text').value;
+      
+      let fullMessage = `Hello, my name is ${name}.\nInquiry: ${msgText}`;
+      if (attachedContactProduct) {
+        fullMessage += `\n\n📦 *Product Inquiry:*\n- Name: ${attachedContactProduct.name}\n- Variant: ${attachedContactProduct.variant}\n- Quantity: ${attachedContactProduct.qty}\n- Total Price: $${(attachedContactProduct.price * attachedContactProduct.qty).toFixed(2)}`;
+      }
+
+      const sellerWhatsAppNumber = "8801700000000"; 
+      const whatsappUrl = `https://wa.me/${sellerWhatsAppNumber}?text=${encodeURIComponent(fullMessage)}`;
+      window.open(whatsappUrl, '_blank');
+
+      document.getElementById('owner-msg-name').value = '';
+      document.getElementById('owner-msg-text').value = '';
+      clearContactProduct();
+      toggleContactModal();
+    }
+
+    function toggleWishlist(id, e) {
+      if (e) e.stopPropagation();
+      const idx = wishlist.indexOf(id);
+      if (idx === -1) wishlist.push(id); else wishlist.splice(idx, 1);
+      updateWishlistUI();
+      renderProducts();
+    }
+
+    function updateWishlistUI() {
+      document.getElementById('wishlist-badge').textContent = wishlist.length;
+      const container = document.getElementById('wishlist-items-container');
+      if (wishlist.length === 0) {
+        container.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs font-medium">Your wishlist is empty.</p>`;
+        return;
+      }
+      container.innerHTML = productsData.filter(p => wishlist.includes(p.id)).map(p => `
+        <div class="flex items-center justify-between border-b dark:border-slate-800 pb-2.5">
+          <div class="flex items-center gap-2.5 cursor-pointer" onclick="openProductDetails('${p.id}'); toggleWishlistModal();">
+            <img src="${p.image}" class="w-11 h-11 rounded-xl object-cover">
+            <div><h4 class="font-bold text-xs text-slate-800 dark:text-slate-200">${p.name}</h4><p class="text-xs font-bold text-indigo-600">$${p.price.toFixed(2)}</p></div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="openProductDetails('${p.id}'); toggleWishlistModal();" class="bg-indigo-600 text-white text-xs px-2.5 py-1 rounded-lg font-semibold active:scale-95">View</button>
+            <button onclick="toggleWishlist('${p.id}', event)" class="text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function toggleWishlistModal() { 
+      const modal = document.getElementById('wishlist-modal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
+      }
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('product-grid');
+      const filtered = productsData.filter(p => (selectedCategory === 'All' || p.category.toLowerCase() === selectedCategory.toLowerCase()) && p.name.toLowerCase().includes(activeSearchQuery));
+      
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 flex flex-col items-center justify-center space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 shadow-sm">
+              <i data-lucide="package-open" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">No Products Found</h3>
+            <p class="text-xs text-slate-500 max-w-xs">We couldn't find any items matching your search or category filter. Try browsing other collections.</p>
+          </div>`;
+        lucide.createIcons();
+        return;
+      }
+
+      grid.innerHTML = filtered.map(product => {
+        const isWishlisted = wishlist.includes(product.id);
+        return `
+          <div class="card-3d-wrap">
+            <div 
+              onclick="openProductDetails('${product.id}')" 
+              class="card-3d-inner bg-white dark:bg-slate-900 rounded-2xl p-3.5 border border-slate-100 dark:border-slate-800 flex flex-col justify-between cursor-pointer shadow-3d-glow group"
+              onmousemove="handle3dTilt(event, this)"
+              onmouseleave="reset3dTilt(this)"
+              ontouchmove="handle3dTiltTouch(event, this)"
+              ontouchend="reset3dTilt(this)"
+            >
+              <div class="relative w-full h-36 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 mb-2.5">
+                <button onclick="toggleWishlist('${product.id}', event)" class="absolute top-2.5 right-2.5 bg-white/80 dark:bg-slate-800/80 p-1.5 rounded-full z-10 hover:scale-110 active:scale-95 transition-transform">
+                  <i data-lucide="heart" class="w-4 h-4 ${isWishlisted ? 'fill-pink-500 text-pink-500' : 'text-slate-700 dark:text-slate-200'}"></i>
+                </button>
+                <img src="${product.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+              </div>
+              <h3 class="font-bold text-xs sm:text-sm line-clamp-1 text-slate-800 dark:text-slate-100">${product.name}</h3>
+              <div class="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-100 dark:border-slate-800" onclick="event.stopPropagation()">
+                <span class="text-xs sm:text-sm font-extrabold text-indigo-600">$${product.price.toFixed(2)}</span>
+                <button onclick="openProductDetails('${product.id}')" class="bg-slate-900 dark:bg-indigo-600 text-white p-2 rounded-xl text-xs font-bold active:scale-95 transition-transform shadow-sm" title="View Options">
+                  <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function handle3dTilt(e, el) {
+      const target = e.currentTarget;
+      const rect = target.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const rotateX = ((y / rect.height) - 0.5) * -6;
+      const rotateY = ((x / rect.width) - 0.5) * 6;
+      target.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+    }
+
+    function handle3dTiltTouch(e, el) {
+      const target = e.currentTarget;
+      if (e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = target.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        const rotateX = ((y / rect.height) - 0.5) * -4;
+        const rotateY = ((x / rect.width) - 0.5) * 4;
+        target.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+      }
+    }
+
+    function reset3dTilt(el) {
+      el.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    }
+
+    function addToCartCustom(productVariantObj, qty = 1) {
+      const cartKey = `${productVariantObj.id}-${productVariantObj.selectedVariant}`;
+      const existing = cart.find(i => `${i.id}-${i.selectedVariant}` === cartKey);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({ ...productVariantObj, qty });
+      }
+      updateCartUI();
+    }
+
+    function removeFromCartSpecific(cartKey) {
+      const idx = cart.findIndex(i => `${i.id}-${i.selectedVariant}` === cartKey);
+      if (idx !== -1) {
+        if (cart[idx].qty > 1) cart[idx].qty--; else cart.splice(idx, 1);
+        updateCartUI();
+      }
+    }
+
+    function removeEntireItemFromCart(cartKey) {
+      cart = cart.filter(i => `${i.id}-${i.selectedVariant}` !== cartKey);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      document.getElementById('cart-badge').textContent = cart.reduce((s, i) => s + i.qty, 0);
+      const container = document.getElementById('cart-items');
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="text-center py-8 text-slate-400 text-xs font-medium">Your bag is empty.</p>`;
+      } else {
+        container.innerHTML = cart.map(i => {
+          const cartKey = `${i.id}-${i.selectedVariant}`;
+          return `
+            <div class="flex items-center justify-between border-b dark:border-slate-800 pb-2.5">
+              <div class="flex items-center gap-2.5">
+                <img src="${i.image}" class="w-11 h-11 rounded-xl object-cover">
+                <div>
+                  <h4 class="font-bold text-xs text-slate-800 dark:text-slate-200">${i.name}</h4>
+                  <p class="text-[10px] text-indigo-500 font-semibold">Variant: ${i.selectedVariant}</p>
+                  <p class="text-xs font-bold text-indigo-600">$${(i.price * i.qty).toFixed(2)}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                  <button onclick="removeFromCartSpecific('${cartKey}')" class="w-5 h-5 bg-white dark:bg-slate-700 rounded text-xs font-bold active:scale-95 shadow-sm">-</button>
+                  <span class="text-xs font-bold px-1 text-slate-800 dark:text-slate-200">${i.qty}</span>
+                  <button onclick="addToCartCustom({id: '${i.id}', name: '${i.name}', price: ${i.price}, image: '${i.image}', selectedVariant: '${i.selectedVariant}'}, 1)" class="w-5 h-5 bg-white dark:bg-slate-700 rounded text-xs font-bold active:scale-95 shadow-sm">+</button>
+                </div>
+                <button onclick="removeEntireItemFromCart('${cartKey}')" class="text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      document.getElementById('cart-total').textContent = `$${cart.reduce((s, i) => s + (i.price * i.qty), 0).toFixed(2)}`;
+      lucide.createIcons();
+    }
+
+    function toggleCartDrawer() { 
+      const drawer = document.getElementById('cart-drawer');
+      drawer.classList.toggle('translate-x-full');
+      if (!drawer.classList.contains('translate-x-full')) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
+      }
+    }
+
+    function toggleAiDrawer() { 
+      const drawer = document.getElementById('ai-drawer');
+      drawer.classList.toggle('translate-x-full');
+      if (!drawer.classList.contains('translate-x-full')) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
+      }
+    }
+
+    function handleAiSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const messagesContainer = document.getElementById('ai-messages');
+      messagesContainer.innerHTML += `
+        <div class="bg-slate-900 text-white p-3 rounded-2xl ml-auto max-w-[85%] text-xs shadow-sm">
+          ${val}
+        </div>
+      `;
+      input.value = '';
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      setTimeout(() => {
+        let aiResponse = "I am ready to help you choose products and complete your order in Bangla or English!";
+        const lowerVal = val.toLowerCase();
+
+        if (lowerVal.includes('দাম') || lowerVal.includes('price') || lowerVal.includes('কত')) {
+          aiResponse = "আমাদের প্রোডাক্টগুলোর দাম এবং ভেরিয়েন্ট দেখতে যেকোনো প্রোডাক্টের ওপর ক্লিক করুন। আপনি চাইলে একাধিক পিস বা ভেরিয়েন্ট সিলেক্ট করতে পারেন।";
+        } else if (lowerVal.includes('অর্ডার') || lowerVal.includes('order') || lowerVal.includes('কিনব')) {
+          aiResponse = "অর্ডার করার জন্য প্রোডাক্টের আইকনে ক্লিক করে আপনার পছন্দমতো ভেরিয়েন্ট দেখে কার্ট করুন এবং চেকআউট করুন।";
+        } else if (lowerVal.includes('হ্যালো') || lowerVal.includes('hi') || lowerVal.includes('hello')) {
+          aiResponse = "ওয়ালাইকুমুস সালাম / হ্যালো! AURA ELITE-এ আপনাকে কীভাবে সাহায্য করতে পারি?";
+        } else {
+          aiResponse = `আপনার প্রশ্নটি নোট করা হয়েছে: "${val}"। আমাদের চমৎকার কালেকশন ব্রাউজ করুন অথবা নির্দিষ্ট প্রোডাক্ট সম্পর্কে জিজ্ঞেস করুন।`;
+        }
+
+        messagesContainer.innerHTML += `
+          <div class="bg-indigo-50 dark:bg-indigo-950 p-3 rounded-2xl max-w-[90%] text-xs shadow-sm text-slate-800 dark:text-slate-200">
+            ${aiResponse}
+          </div>
+        `;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 600);
+    }
+
+    /* CHECKOUT & PAYMENT MODAL FUNCTIONS */
+    function openCheckoutModal() {
+      if (cart.length === 0) {
+        alert("Your shopping bag is empty!");
+        return;
+      }
+
+      const summaryItems = document.getElementById('checkout-summary-items');
+      summaryItems.innerHTML = cart.map(i => `
+        <div class="flex justify-between">
+          <span>${i.name} (${i.selectedVariant}) x${i.qty}</span>
+          <span class="font-bold">$${(i.price * i.qty).toFixed(2)}</span>
+        </div>
+      `).join('');
+
+      const totalPayable = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+      document.getElementById('checkout-summary-total').textContent = `$${totalPayable.toFixed(2)}`;
+
+      toggleCartDrawer();
+      document.getElementById('checkout-modal').classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+
+    function toggleCheckoutModal() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+
+    function togglePaymentDetails(method) {
+      const box = document.getElementById('mobile-payment-box');
+      const instruction = document.getElementById('payment-instruction');
+      
+      if (method === 'bkash') {
+        box.classList.remove('hidden');
+        instruction.innerHTML = 'Send Money/Payment to Merchant bKash: <strong class="text-pink-600">01700000000</strong>';
+      } else if (method === 'nagad') {
+        box.classList.remove('hidden');
+        instruction.innerHTML = 'Send Money/Payment to Merchant Nagad: <strong class="text-orange-600">01800000000</strong>';
+      } else if (method === 'rocket') {
+        box.classList.remove('hidden');
+        instruction.innerHTML = 'Send Money/Payment to Merchant Rocket: <strong class="text-purple-600">01900000000</strong>';
+      } else if (method === 'card') {
+        box.classList.remove('hidden');
+        instruction.innerHTML = 'Card Payment Selected. Enter Card Reference or Bank Trx ID below:';
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function processFinalOrder(e) {
+      e.preventDefault();
+      const name = document.getElementById('cust-name').value;
+      const phone1 = document.getElementById('cust-phone-1').value;
+      const phone2 = document.getElementById('cust-phone-2').value;
+      const address = document.getElementById('cust-address').value;
+      const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+      const trxId = document.getElementById('trx-id').value;
+
+      if (paymentMethod !== 'Cash on Delivery' && !trxId) {
+        alert('Please enter your Payment Transaction ID (TrxID)!');
+        return;
+      }
+
+      if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+
+      alert(`🎉 Order Placed Successfully!\n\nName: ${name}\nPrimary Phone: ${phone1}\nAlt Phone: ${phone2}\nAddress: ${address}\nPayment Method: ${paymentMethod}`);
+
+      cart = [];
+      updateCartUI();
+      toggleCheckoutModal();
+      renderProducts();
+    }
+
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+    window.onload = function() {
+      renderBannerSlider();
+      startBannerInterval();
+      renderCategoryBar();
+      renderProducts();
+      updateCartUI();
+      updateWishlistUI();
+    };
+  </script>
+</body>
+</html>
